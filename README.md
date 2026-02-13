@@ -1,6 +1,6 @@
 # Go Log Forwarder
 
-A lightweight, concurrent log forwarding agent written in Go. It monitors multiple log files defined by glob patterns, enriches the log lines with metadata (timestamp, host, source), and outputs them as JSON to `stdout`.
+A lightweight, concurrent log forwarding agent written in Go. It monitors multiple log files defined by glob patterns, enriches the log lines with metadata (time, host, source, sourcetype), and outputs them as JSON to `stdout` in Splunk HEC compatible format.
 
 ## Features
 
@@ -12,7 +12,7 @@ A lightweight, concurrent log forwarding agent written in Go. It monitors multip
 - **Enrichment**: Add custom static fields to log entries via configuration.
 - **Observability**: Exposes internal metrics in Prometheus format via the `/metrics` endpoint.
 - **Graceful Shutdown**: Handles `SIGINT` and `SIGTERM` to ensure all logs are flushed before exiting.
-- **Structured Output**: Emits logs in JSON format for easy ingestion by log aggregators.
+- **Structured Output**: Emits logs in Splunk HEC compatible JSON format (`time`, `host`, `source`, `sourcetype`, `event`) for easy ingestion.
 
 ## Prerequisites
 
