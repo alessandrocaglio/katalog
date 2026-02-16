@@ -25,8 +25,8 @@ archives:
   - id: default
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     # This handles your requirement: zip for windows, tar.gz for others
-    format: tar.gz
     formats:
+      - tar.gz
       - zip
 
 checksum:
@@ -44,12 +44,10 @@ changelog:
       - "^docs:"
       - "^test:"
 
-# Simplified dockers_v2 block
 dockers_v2:
   - id: katalog
-    # GoReleaser will push quay.io/user/katalog:v0.0.6 AND quay.io/user/katalog:latest
     images:
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog"
+      - "quay.io/acaglio/katalog"
     tags:
       - "{{ .Tag }}"
       - latest
