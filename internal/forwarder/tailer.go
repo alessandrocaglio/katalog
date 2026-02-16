@@ -12,11 +12,19 @@ import (
 	"sync"
 	"time"
 
-	"go-log-forwarder/internal/metrics"
-	"go-log-forwarder/internal/models"
+	"katalog/internal/metrics"
+	"katalog/internal/models"
 )
 
-func TailFile(ctx context.Context, wg *sync.WaitGroup, path string, groupName string, hostname string, out chan<- models.LogEntry, excludeRegex *regexp.Regexp, multilineRegex *regexp.Regexp, customFields map[string]string) {
+type TailOptions struct {
+	GroupName      string
+	Hostname       string
+	ExcludeRegex   *regexp.Regexp
+	MultilineRegex *regexp.Regexp
+	CustomFields   map[string]string
+}
+
+func TailFile(ctx context.Context, wg *sync.WaitGroup, path string, out chan<- models.LogEntry, opts TailOptions) {
 	defer wg.Done()
 
 	file, err := os.Open(path)
@@ -38,19 +46,19 @@ func TailFile(ctx context.Context, wg *sync.WaitGroup, path string, groupName st
 		if msg == "" {
 			return
 		}
-		if excludeRegex != nil && excludeRegex.MatchString(msg) {
+		if opts.ExcludeRegex != nil && opts.ExcludeRegex.MatchString(msg) {
 			return
 		}
 
 		out <- models.LogEntry{
 			Time:       time.Now().Unix(),
-			Host:       hostname,
+			Host:       opts.Hostname,
 			Source:     filepath.Base(path),
-			SourceType: groupName,
+			SourceType: opts.GroupName,
 			Event:      msg,
-			Fields:     customFields,
+			Fields:     opts.CustomFields,
 		}
-		metrics.LinesProcessed.WithLabelValues(path, groupName).Inc()
+		metrics.LinesProcessed.WithLabelValues(path, opts.GroupName).Inc()
 	}
 
 	// We manage file closing manually to support rotation
@@ -114,29 +122,29 @@ func TailFile(ctx context.Context, wg *sync.WaitGroup, path string, groupName st
 			}
 
 			// Multiline Logic
-			if multilineRegex != nil {
+			if opts.MultilineRegex != nil {
 				// Check if this line starts a new log entry
-				if multilineRegex.MatchString(line) {
+				if opts.MultilineRegex.MatchString(line) {
 					flushBuffer()
 				}
 				multilineBuffer.WriteString(line)
 			} else {
 				// Single line mode
 				msg := strings.TrimSpace(line)
-				if excludeRegex != nil && excludeRegex.MatchString(msg) {
+				if opts.ExcludeRegex != nil && opts.ExcludeRegex.MatchString(msg) {
 					continue
 				}
 
 				select {
 				case out <- models.LogEntry{
 					Time:       time.Now().Unix(),
-					Host:       hostname,
+					Host:       opts.Hostname,
 					Source:     filepath.Base(path),
-					SourceType: groupName,
+					SourceType: opts.GroupName,
 					Event:      msg,
-					Fields:     customFields,
+					Fields:     opts.CustomFields,
 				}:
-					metrics.LinesProcessed.WithLabelValues(path, groupName).Inc()
+					metrics.LinesProcessed.WithLabelValues(path, opts.GroupName).Inc()
 				case <-ctx.Done():
 					file.Close()
 					return

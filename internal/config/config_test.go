@@ -26,6 +26,17 @@ targets:
 			expectError: false,
 		},
 		{
+			name: "Valid Config with RAW format",
+			content: `
+poll_interval: "1s"
+output_format: "raw"
+targets:
+  - name: "test-logs"
+    paths: ["/tmp/*.log"]
+`,
+			expectError: false,
+		},
+		{
 			name:          "File Not Found",
 			filename:      "non_existent_config.yaml",
 			expectError:   true,
@@ -51,6 +62,18 @@ targets:
 `,
 			expectError:   true,
 			errorContains: "invalid poll_interval",
+		},
+		{
+			name: "Invalid Output Format",
+			content: `
+poll_interval: "1s"
+output_format: "xml"
+targets:
+  - name: "logs"
+    paths: ["/var/log/app.log"]
+`,
+			expectError:   true,
+			errorContains: "invalid output_format",
 		},
 		{
 			name: "No Targets",

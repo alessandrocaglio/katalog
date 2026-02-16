@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"go-log-forwarder/internal/models"
+	"katalog/internal/models"
 )
 
-func WriteLogs(out <-chan models.LogEntry) {
+func WriteLogs(out <-chan models.LogEntry, format string) {
 	// Use a buffered writer to reduce syscalls
 	w := bufio.NewWriter(os.Stdout)
 	defer w.Flush()
@@ -26,7 +26,11 @@ func WriteLogs(out <-chan models.LogEntry) {
 			if !ok {
 				return
 			}
-			encoder.Encode(entry)
+			if format == "raw" {
+				w.WriteString(entry.Event + "\n")
+			} else {
+				encoder.Encode(entry)
+			}
 		case <-flushTicker.C:
 			w.Flush()
 		}

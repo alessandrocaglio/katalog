@@ -1,4 +1,4 @@
-module go-log-forwarder
+module katalog
 
 go 1.23.0
 

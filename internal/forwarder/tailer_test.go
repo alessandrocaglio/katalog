@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"go-log-forwarder/internal/models"
+	"katalog/internal/models"
 )
 
 func TestTailFile(t *testing.T) {
@@ -30,7 +30,10 @@ func TestTailFile(t *testing.T) {
 
 	// 3. Start tailing
 	wg.Add(1)
-	go TailFile(ctx, &wg, tmpfile.Name(), "test-group", "test-host", outCh, nil, nil, nil)
+	go TailFile(ctx, &wg, tmpfile.Name(), outCh, TailOptions{
+		GroupName: "test-group",
+		Hostname:  "test-host",
+	})
 
 	// Give the goroutine a moment to open the file and seek to the end
 	time.Sleep(100 * time.Millisecond)
@@ -91,7 +94,10 @@ func TestTailFileRotation(t *testing.T) {
 
 	// 3. Start tailing
 	wg.Add(1)
-	go TailFile(ctx, &wg, logPath, "rotation-group", "host", outCh, nil, nil, nil)
+	go TailFile(ctx, &wg, logPath, outCh, TailOptions{
+		GroupName: "rotation-group",
+		Hostname:  "host",
+	})
 
 	// Allow startup
 	time.Sleep(100 * time.Millisecond)
@@ -165,7 +171,10 @@ func TestTailFileTruncation(t *testing.T) {
 
 	// 3. Start tailing
 	wg.Add(1)
-	go TailFile(ctx, &wg, tmpfile.Name(), "trunc-group", "test-host", outCh, nil, nil, nil)
+	go TailFile(ctx, &wg, tmpfile.Name(), outCh, TailOptions{
+		GroupName: "trunc-group",
+		Hostname:  "test-host",
+	})
 
 	// Allow startup
 	time.Sleep(100 * time.Millisecond)
@@ -237,7 +246,11 @@ func TestTailFileExclusion(t *testing.T) {
 
 	// 4. Start tailing
 	wg.Add(1)
-	go TailFile(ctx, &wg, tmpfile.Name(), "exclude-group", "test-host", outCh, re, nil, nil)
+	go TailFile(ctx, &wg, tmpfile.Name(), outCh, TailOptions{
+		GroupName:    "exclude-group",
+		Hostname:     "test-host",
+		ExcludeRegex: re,
+	})
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -301,7 +314,11 @@ func TestTailFileMultiline(t *testing.T) {
 
 	// 4. Start tailing
 	wg.Add(1)
-	go TailFile(ctx, &wg, tmpfile.Name(), "multi-group", "test-host", outCh, nil, multiRe, nil)
+	go TailFile(ctx, &wg, tmpfile.Name(), outCh, TailOptions{
+		GroupName:      "multi-group",
+		Hostname:       "test-host",
+		MultilineRegex: multiRe,
+	})
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -376,7 +393,11 @@ func TestTailFileEnrichment(t *testing.T) {
 
 	// 4. Start tailing
 	wg.Add(1)
-	go TailFile(ctx, &wg, tmpfile.Name(), "enrich-group", "test-host", outCh, nil, nil, fields)
+	go TailFile(ctx, &wg, tmpfile.Name(), outCh, TailOptions{
+		GroupName:    "enrich-group",
+		Hostname:     "test-host",
+		CustomFields: fields,
+	})
 
 	time.Sleep(100 * time.Millisecond)
 

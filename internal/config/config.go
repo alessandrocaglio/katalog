@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	PollInterval string   `yaml:"poll_interval"`
+	OutputFormat string   `yaml:"output_format,omitempty"`
 	Targets      []Target `yaml:"targets"`
 }
 
@@ -34,6 +35,12 @@ func Load(path string) (Config, error) {
 func (c *Config) Validate() (time.Duration, error) {
 	if c.PollInterval == "" {
 		return 0, fmt.Errorf("poll_interval must be set")
+	}
+	if c.OutputFormat == "" {
+		c.OutputFormat = "json"
+	}
+	if c.OutputFormat != "json" && c.OutputFormat != "raw" {
+		return 0, fmt.Errorf("invalid output_format: %s", c.OutputFormat)
 	}
 	pollDur, err := time.ParseDuration(c.PollInterval)
 	if err != nil {
