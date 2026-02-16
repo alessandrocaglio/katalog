@@ -5,6 +5,7 @@ before:
     - go mod tidy
     - go test ./...
 
+# Build binaries
 builds:
   - id: katalog
     binary: katalog
@@ -18,6 +19,7 @@ builds:
     ldflags:
       - -s -w
 
+# Archives for release
 archives:
   - builds:
       - katalog
@@ -25,29 +27,37 @@ archives:
       - goos: windows
         format: zip
 
+# Checksums
 checksum:
   name_template: "checksums.txt"
 
+# GitHub Release
 release:
   github:
     owner: alessandrocaglio
     name: katalog
 
-# -----------------------------
+# Changelog generation
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
 # Docker images
-# -----------------------------
 dockers:
   - image_templates:
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-amd64"
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-amd64"
     goarch: amd64
-    dockerfile: Dockerfile
+    dockerfile: Containerfile
 
   - image_templates:
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-arm64"
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-arm64"
     goarch: arm64
-    dockerfile: Dockerfile
+    dockerfile: Containerfile
 
 docker_manifests:
   - name_template: "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}"
