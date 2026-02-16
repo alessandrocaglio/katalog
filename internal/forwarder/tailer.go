@@ -63,7 +63,10 @@ func TailFile(ctx context.Context, wg *sync.WaitGroup, path string, out chan<- m
 
 	// We manage file closing manually to support rotation
 
-	file.Seek(0, io.SeekEnd)
+	if _, err := file.Seek(0, io.SeekEnd); err != nil {
+		metrics.FileErrors.WithLabelValues(path, "seek").Inc()
+		return
+	}
 	fi, err := file.Stat()
 	if err != nil {
 		file.Close()
@@ -99,7 +102,12 @@ func TailFile(ctx context.Context, wg *sync.WaitGroup, path string, out chan<- m
 							// Handle truncation (inode same, but size decreased)
 							log.Printf("File truncation detected: %s", path)
 							multilineBuffer.Reset() // Discard partial buffer on truncation
-							file.Seek(0, io.SeekStart)
+							if _, err := file.Seek(0, io.SeekStart); err != nil {
+								metrics.FileErrors.WithLabelValues(path, "seek_start").Inc()
+								log.Printf("Error seeking to start of file after truncation for %s: %v", path, err)
+								file.Close()
+								return
+							}
 							fi = newFi
 							reader = bufio.NewReader(file)
 							continue

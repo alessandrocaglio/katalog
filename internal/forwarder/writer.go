@@ -3,6 +3,7 @@ package forwarder
 import (
 	"bufio"
 	"encoding/json"
+	"log" // Added for error logging
 	"os"
 	"time"
 
@@ -24,15 +25,25 @@ func WriteLogs(out <-chan models.LogEntry, format string) {
 		select {
 		case entry, ok := <-out:
 			if !ok {
+				// Channel closed, flush anything remaining and return
+				_ = w.Flush() // Attempt to flush, ignore error on shutdown
 				return
 			}
 			if format == "raw" {
-				w.WriteString(entry.Event + "\n")
+				if _, err := w.WriteString(entry.Event + "\n"); err != nil {
+					// Log the error, but continue trying to write next logs
+					log.Printf("Error writing raw log to stdout: %v", err)
+				}
 			} else {
-				encoder.Encode(entry)
+				if err := encoder.Encode(entry); err != nil {
+					// Log the error, but continue trying to write next logs
+					log.Printf("Error encoding JSON log to stdout: %v", err)
+				}
 			}
 		case <-flushTicker.C:
-			w.Flush()
+			if err := w.Flush(); err != nil {
+				log.Printf("Error flushing writer buffer: %v", err)
+			}
 		}
 	}
 }

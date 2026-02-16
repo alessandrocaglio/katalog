@@ -45,7 +45,9 @@ func TestWriteLogs(t *testing.T) {
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("Failed to copy stdout to buffer: %v", err)
+	}
 
 	// 6. Verify JSON
 	var output models.LogEntry
@@ -92,7 +94,9 @@ func TestWriteLogsRaw(t *testing.T) {
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatalf("Failed to copy stdout to buffer: %v", err)
+	}
 
 	if buf.String() != "raw message\n" {
 		t.Errorf("Expected 'raw message\\n', got '%s'", buf.String())

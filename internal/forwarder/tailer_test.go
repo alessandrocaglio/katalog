@@ -324,13 +324,23 @@ func TestTailFileMultiline(t *testing.T) {
 
 	// 5. Write logs
 	// Entry 1: Single line
-	tmpfile.WriteString("2023-01-01 10:00:00 INFO Start\n")
+	if _, err := tmpfile.WriteString("2023-01-01 10:00:00 INFO Start\n"); err != nil {
+		t.Fatal(err)
+	}
 	// Entry 2: Multiline (Stack trace)
-	tmpfile.WriteString("2023-01-01 10:00:01 ERROR Crash\n")
-	tmpfile.WriteString("java.lang.Exception: Boom\n")
-	tmpfile.WriteString("\tat com.example.Main.main(Main.java:10)\n")
+	if _, err := tmpfile.WriteString("2023-01-01 10:00:01 ERROR Crash\n"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := tmpfile.WriteString("java.lang.Exception: Boom\n"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := tmpfile.WriteString("\tat com.example.Main.main(Main.java:10)\n"); err != nil {
+		t.Fatal(err)
+	}
 	// Entry 3: Single line (Triggers flush of Entry 2)
-	tmpfile.WriteString("2023-01-01 10:00:02 INFO End\n")
+	if _, err := tmpfile.WriteString("2023-01-01 10:00:02 INFO End\n"); err != nil {
+		t.Fatal(err)
+	}
 
 	// 6. Verify
 	// Expect Entry 1
@@ -402,7 +412,9 @@ func TestTailFileEnrichment(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	// 5. Write log
-	tmpfile.WriteString("Transaction processed\n")
+	if _, err := tmpfile.WriteString("Transaction processed\n"); err != nil {
+		t.Fatal(err)
+	}
 
 	// 6. Verify fields
 	select {
