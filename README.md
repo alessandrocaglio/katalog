@@ -87,29 +87,29 @@ To run the log forwarder in a container, you can use the following `Containerfil
    COPY go.mod go.sum ./
    RUN go mod download
    COPY . .
-   RUN CGO_ENABLED=0 GOOS=linux go build -o log-forwarder .
+   RUN CGO_ENABLED=0 GOOS=linux go build -o katalog .
 
    # Run Stage
    FROM registry.access.redhat.com/ubi9/ubi-minimal
    WORKDIR /app
-   COPY --from=builder /app/log-forwarder .
+   COPY --from=builder /app/katalog .
    # Copy default config (can be overridden at runtime)
    COPY config.yaml .
-   CMD ["./log-forwarder"]
+   CMD ["./katalog"]
    ```
 
 2. Build the image:
    ```bash
-   podman build -t log-forwarder .
+   podman build -t katalog .
    ```
 
 3. Run the container:
    ```bash
    podman run -d \
-     --name log-forwarder \
+     --name katalog \
      -v $(pwd)/config.yaml:/app/config.yaml:Z \
      -v /var/log:/var/log:ro \
-     log-forwarder
+     katalog
    ```
 
 ## Kubernetes Deployment
@@ -125,7 +125,7 @@ A `DaemonSet` is the ideal pattern when you want to collect logs from every node
    apiVersion: v1
    kind: ConfigMap
    metadata:
-     name: log-forwarder-config
+     name: katalog-config
    data:
      config.yaml: |
        poll_interval: "5s"
@@ -143,17 +143,17 @@ A `DaemonSet` is the ideal pattern when you want to collect logs from every node
    apiVersion: apps/v1
    kind: DaemonSet
    metadata:
-     name: log-forwarder
+     name: katalog
      labels:
-       app: log-forwarder
+       app: katalog
    spec:
      selector:
        matchLabels:
-         app: log-forwarder
+         app: katalog
      template:
        metadata:
          labels:
-           app: log-forwarder
+           app: katalog
        spec:
          # Tolerate running on control-plane nodes
          tolerations:
@@ -164,8 +164,8 @@ A `DaemonSet` is the ideal pattern when you want to collect logs from every node
            operator: Exists
            effect: NoSchedule
          containers:
-           - name: log-forwarder
-             image: your-repo/log-forwarder:latest
+           - name: katalog
+             image: your-repo/katalog:latest
              imagePullPolicy: IfNotPresent
              ports:
                - containerPort: 8080
@@ -187,7 +187,7 @@ A `DaemonSet` is the ideal pattern when you want to collect logs from every node
          volumes:
            - name: config
              configMap:
-               name: log-forwarder-config
+               name: katalog-config
            - name: logs
              hostPath:
                path: /var/log
@@ -199,7 +199,7 @@ A `DaemonSet` is the ideal pattern when you want to collect logs from every node
    kubectl apply -f katalog-daemonset.yaml
    ```
 
-### As a Deployment (Sidecar)
+### As a Deployment
 
 A `Deployment` is suitable when you want to collect logs from a specific application, rather than from every node. A common pattern is to run Katalog as a **sidecar container** in your application's pod.
 
@@ -230,8 +230,8 @@ In this scenario, you share a volume between your application container and the 
           # 2. Volume for the katalog config
           - name: config
             configMap:
-              # Assumes a ConfigMap named 'log-forwarder-config' exists
-              name: log-forwarder-config
+              # Assumes a ConfigMap named 'katalog-config' exists
+              name: katalog-config
           containers:
           # Your application container
           - name: my-application-container
@@ -241,7 +241,7 @@ In this scenario, you share a volume between your application container and the 
               mountPath: /var/log/app # Writes logs here
           # The Katalog sidecar container
           - name: katalog-sidecar
-            image: your-repo/log-forwarder:latest
+            image: your-repo/katalog:latest
             imagePullPolicy: IfNotPresent
             volumeMounts:
             - name: config
