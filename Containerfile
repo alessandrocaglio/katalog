@@ -2,6 +2,9 @@
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal
 
+# 1. Declare the build-arg that GoReleaser/Buildx provides automatically
+ARG TARGETPLATFORM
+
 # Install runtime requirements only
 RUN microdnf install -y \
       ca-certificates \
@@ -17,7 +20,8 @@ LABEL org.opencontainers.image.source="https://github.com/alessandrocaglio/katal
 
 USER 10001
 
-# GoReleaser will place the binary in the build context
-COPY katalog /usr/local/bin/katalog
+# 2. FIX: GoReleaser v2 places the binary in a platform-specific subfolder
+# This variable resolves to things like "linux/amd64/katalog"
+COPY $TARGETPLATFORM/katalog /usr/local/bin/katalog
 
 ENTRYPOINT ["/usr/local/bin/katalog"]
