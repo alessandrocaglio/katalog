@@ -1,5 +1,7 @@
 # Katalog
 
+![CI](https://github.com/alessandrocaglio/katalog/actions/workflows/ci.yaml/badge.svg)
+
 **A lightweight, concurrent log forwarding agent written in Go.**
 
 Katalog monitors log files, enriches them with metadata, and streams them as structured JSON to `stdout`. It's designed to be a simple, efficient, and reliable building block for your logging pipeline.

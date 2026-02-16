@@ -12,8 +12,6 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - darwin
-      - windows
     goarch:
       - amd64
       - arm64
@@ -21,8 +19,7 @@ builds:
       - -s -w
 
 archives:
-  - id: default
-    builds:
+  - builds:
       - katalog
     format_overrides:
       - goos: windows
@@ -36,9 +33,29 @@ release:
     owner: alessandrocaglio
     name: katalog
 
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
+# -----------------------------
+# Docker images
+# -----------------------------
+dockers:
+  - image_templates:
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-amd64"
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-amd64"
+    goarch: amd64
+    dockerfile: Dockerfile
+
+  - image_templates:
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-arm64"
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-arm64"
+    goarch: arm64
+    dockerfile: Dockerfile
+
+docker_manifests:
+  - name_template: "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}"
+    image_templates:
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-amd64"
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-arm64"
+
+  - name_template: "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest"
+    image_templates:
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-amd64"
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-arm64"
