@@ -52,24 +52,20 @@ dockers:
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-amd64"
     goarch: amd64
     dockerfile: Containerfile
-    push: true
 
   - image_templates:
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-arm64"
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-arm64"
     goarch: arm64
     dockerfile: Containerfile
-    push: true
 
 docker_manifests:
   - name_template: "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}"
     image_templates:
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-amd64"
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-arm64"
-    push: true
 
   - name_template: "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest"
     image_templates:
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-amd64"
       - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-arm64"
-    push: true
