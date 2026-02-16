@@ -7,14 +7,14 @@ import (
 var (
 	LinesProcessed = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "log_forwarder_lines_total",
-			Help: "Total number of log lines processed per file",
+			Name: "katalog_processed_lines_total",
+			Help: "Total number of lines processed per file",
 		},
 		[]string{"path", "group"},
 	)
 	FileErrors = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "log_forwarder_file_errors_total",
+			Name: "katalog_file_errors_total",
 			Help: "Total number of file errors",
 		},
 		[]string{"path", "error_type"},
