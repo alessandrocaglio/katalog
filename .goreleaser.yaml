@@ -1,4 +1,5 @@
 version: 2
+
 project_name: katalog
 
 before:
@@ -6,7 +7,6 @@ before:
     - go mod tidy
     - go test ./...
 
-# Build binaries
 builds:
   - id: katalog
     binary: katalog
@@ -14,31 +14,29 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
+      - windows
     goarch:
       - amd64
       - arm64
     ldflags:
       - -s -w
 
-# Archives for release
 archives:
-  - builds:
-      - katalog
-    format_overrides:
-      - goos: windows
-        format: zip
+  - id: default
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    # This handles your requirement: zip for windows, tar.gz for others
+    format: tar.gz
+    formats:
+      - zip
 
-# Checksums
 checksum:
   name_template: "checksums.txt"
 
-# GitHub Release
 release:
   github:
     owner: alessandrocaglio
     name: katalog
 
-# Changelog generation
 changelog:
   sort: asc
   filters:
@@ -46,27 +44,16 @@ changelog:
       - "^docs:"
       - "^test:"
 
-# Docker images
-dockers:
-  - image_templates:
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-amd64"
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-amd64"
-    goarch: amd64
+# Simplified dockers_v2 block
+dockers_v2:
+  - id: katalog
+    # GoReleaser will push quay.io/user/katalog:v0.0.6 AND quay.io/user/katalog:latest
+    images:
+      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog"
+    tags:
+      - "{{ .Tag }}"
+      - latest
+    platforms:
+      - linux/amd64
+      - linux/arm64
     dockerfile: Containerfile
-
-  - image_templates:
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-arm64"
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-arm64"
-    goarch: arm64
-    dockerfile: Containerfile
-
-docker_manifests:
-  - name_template: "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}"
-    image_templates:
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-amd64"
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:{{ .Tag }}-arm64"
-
-  - name_template: "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest"
-    image_templates:
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-amd64"
-      - "quay.io/{{ .Env.QUAY_USERNAME }}/katalog:latest-arm64"
