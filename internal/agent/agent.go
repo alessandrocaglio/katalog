@@ -17,7 +17,7 @@ import (
 // Package-level variables for the functions we want to make mockable.
 // These are initialized with the real implementations by default.
 var (
-	tailFileFunc = forwarder.TailFile
+	tailFileFunc  = forwarder.TailFile
 	writeLogsFunc = forwarder.WriteLogs
 )
 

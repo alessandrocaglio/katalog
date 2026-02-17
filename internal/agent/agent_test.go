@@ -53,8 +53,8 @@ func TestAgent_New(t *testing.T) {
 					{Name: "bad-regex", Paths: []string{"/tmp/*.log"}, ExcludePattern: "["},
 				},
 			},
-			hostname:    "test-host",
-			expectError: true,
+			hostname:      "test-host",
+			expectError:   true,
 			errorContains: "invalid exclude_pattern",
 		},
 		{
@@ -65,8 +65,8 @@ func TestAgent_New(t *testing.T) {
 					{Name: "bad-regex", Paths: []string{"/tmp/*.log"}, MultilinePattern: "("},
 				},
 			},
-			hostname:    "test-host",
-			expectError: true,
+			hostname:      "test-host",
+			expectError:   true,
 			errorContains: "invalid multiline_pattern",
 		},
 	}
