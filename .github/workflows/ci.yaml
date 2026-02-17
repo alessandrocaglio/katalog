@@ -43,8 +43,8 @@ jobs:
         run: go build ./...
 
       - name: Run tests
-        run: go test ./... 
-
+        run: go test ./... -v 
+        
       - name: Run govulncheck
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
