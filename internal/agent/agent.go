@@ -14,6 +14,13 @@ import (
 	"katalog/internal/models"
 )
 
+// Package-level variables for the functions we want to make mockable.
+// These are initialized with the real implementations by default.
+var (
+	tailFileFunc = forwarder.TailFile
+	writeLogsFunc = forwarder.WriteLogs
+)
+
 type Agent struct {
 	cfg        *config.Config
 	hostname   string
@@ -62,7 +69,7 @@ func (a *Agent) Run(ctx context.Context) {
 	writerWg.Add(1)
 	go func() {
 		defer writerWg.Done()
-		forwarder.WriteLogs(a.logCh, a.cfg.OutputFormat)
+		writeLogsFunc(a.logCh, a.cfg.OutputFormat) // Use the mockable function
 	}()
 
 	pollDur, _ := time.ParseDuration(a.cfg.PollInterval)
@@ -114,7 +121,7 @@ func (a *Agent) discover(ctx context.Context) {
 						CustomFields:   target.Fields,
 					}
 
-					go forwarder.TailFile(fileCtx, &a.wg, path, a.logCh, opts)
+					go tailFileFunc(fileCtx, &a.wg, path, a.logCh, opts) // Use the mockable function
 					log.Printf("Started tracking: %s", path)
 				}
 			}
