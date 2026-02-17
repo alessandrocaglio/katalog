@@ -45,8 +45,18 @@ jobs:
       - name: Run tests
         run: go test ./... -v -race -cover
 
-      # - name: Run govulncheck
-      #   run: |
-      #     go install golang.org/x/vuln/cmd/govulncheck@latest
-      #     govulncheck ./...
+      - name: Run govulncheck
+        continue-on-error: true
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          OUTPUT=$(govulncheck ./... 2>&1)
+          
+          EXIT_CODE=$?
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::warning::govulncheck found vulnerabilities"
+            echo "$OUTPUT"
+          else
+            echo "No vulnerabilities found"
+          fi
 
